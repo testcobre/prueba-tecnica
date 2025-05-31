@@ -1,0 +1,47 @@
+version: '3.8'
+
+volumes:
+  postgres-data:
+
+services:
+  app:
+    container_name: prueba-tecnica-dev
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    environment:
+        POSTGRES_PASSWORD: 12345678
+        POSTGRES_USER: postgres
+        POSTGRES_DB: prueba_tecnica
+        POSTGRES_HOSTNAME: prueba-tecnica-postgres
+    volumes:
+      - ../..:/workspaces:cached
+      - ${HOME}/.m2:/home/vscode/.m2
+      - ${HOME}/.aws/:/home/vscode/.aws/
+    command: sleep infinity
+    # Runs app on the same network as the database container, allows "forwardPorts" in devcontainer.json function.
+    network_mode: service:postgres
+  postgres:
+    image: postgres:14.12
+    container_name: prueba-tecnica-postgres
+    restart: unless-stopped
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: 12345678
+      POSTGRES_USER: postgres
+      POSTGRES_DB: prueba_tecnica
+    ports:
+      - '5431:5432'
+  adminer:
+    image: adminer
+    container_name: monchis-vendors-orders-adapter-jedi-adminer
+    restart: always
+    ports:
+      - '8081:8080'
+  sonar:
+    image: 'sonarqube:9.9.2-community'
+    container_name: monchis-vendors-orders-adapter-jedi-sonar
+    command: -Dsonar.ce.javaOpts=-Xmx256m -Dsonar.web.javaOpts=-Xmx256m
+    ports:
+      - '9001:9000'  
