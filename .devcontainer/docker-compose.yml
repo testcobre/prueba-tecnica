@@ -20,7 +20,9 @@ services:
       - ${HOME}/.aws/:/home/vscode/.aws/
     command: sleep infinity
     # Runs app on the same network as the database container, allows "forwardPorts" in devcontainer.json function.
-    network_mode: service:postgres
+    #network_mode: service:postgres
+    networks:
+      - monitoring
   postgres:
     image: postgres:14.12
     container_name: prueba-tecnica-postgres
@@ -33,15 +35,54 @@ services:
       POSTGRES_DB: prueba_tecnica
     ports:
       - '5431:5432'
+    networks:
+      - monitoring  
   adminer:
     image: adminer
-    container_name: monchis-vendors-orders-adapter-jedi-adminer
+    container_name: prueba-tecnica-adminer
     restart: always
     ports:
       - '8081:8080'
+    networks:
+      - monitoring  
   sonar:
     image: 'sonarqube:9.9.2-community'
-    container_name: monchis-vendors-orders-adapter-jedi-sonar
+    container_name: prueba-tecnica-sonar
     command: -Dsonar.ce.javaOpts=-Xmx256m -Dsonar.web.javaOpts=-Xmx256m
     ports:
       - '9001:9000'  
+    networks:
+      - monitoring  
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prueba-tecnica-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'    
+    #network_mode: service:app  
+    networks:
+      - monitoring
+
+  # Grafana para dashboard
+  grafana:
+    image: grafana/grafana:latest
+    container_name: prueba-tecnica-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - monitoring
+
+networks:
+  monitoring:
+    driver: bridge

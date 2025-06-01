@@ -12,5 +12,5 @@ public interface NotificationEventService {
 
     Optional<NotificationEvent> getNotificationEventById(String notificationEventId);
 
-    NotificationEvent replayNotificationEvent(String notificationEventId);
+    Optional<NotificationEvent> replayNotificationEvent(String notificationEventId);
 }
