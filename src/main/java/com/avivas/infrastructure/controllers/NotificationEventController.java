@@ -15,34 +15,37 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.avivas.application.NotificationEventService;
+import com.avivas.application.ReplyNotificationEventService;
 import com.avivas.domain.entity.NotificationEvent;
 import com.avivas.infrastructure.controllers.dto.NotificationEventGet;
 import com.avivas.infrastructure.controllers.mappers.NotificationEventMapper;
 
-
-
 @RestController
 public class NotificationEventController {
     private final NotificationEventService notificationEventService;
+    private final ReplyNotificationEventService replyNotificationEventService;
 
-    NotificationEventController(NotificationEventService notificationEventService) {
+    NotificationEventController(NotificationEventService notificationEventService,ReplyNotificationEventService replyNotificationEventService) {
         this.notificationEventService = notificationEventService;
+        this.replyNotificationEventService = replyNotificationEventService;
     }
-    
+
     @GetMapping("/notification-events")
-    public List<NotificationEventGet> getNotificationEvents(@RequestParam(name ="delivery_status",required = false) String deliveryStatus
-                                                           ,@RequestParam(name ="delivery_date",required = false)  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) OffsetDateTime  deliveryDate
-                                                           ,@RequestParam(name ="page_size",required = true,defaultValue = "10") int pageSize
-                                                           ,@RequestParam(name ="page_number",required = true,defaultValue = "0") int pageNumber) {
+    public List<NotificationEventGet> getNotificationEvents(
+            @RequestParam(name = "delivery_status", required = false) String deliveryStatus,
+            @RequestParam(name = "delivery_date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) OffsetDateTime deliveryDate,
+            @RequestParam(name = "page_size", required = true, defaultValue = "10") int pageSize,
+            @RequestParam(name = "page_number", required = true, defaultValue = "0") int pageNumber) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        return this.notificationEventService.getNotificationEvents(deliveryStatus,  deliveryDate, pageable)
+        return this.notificationEventService.getNotificationEvents(deliveryStatus, deliveryDate, pageable)
                 .stream()
                 .map(NotificationEventMapper::map)
                 .toList();
     }
-    
+
     @GetMapping("/notification-events/{notification_event_id}")
-    public ResponseEntity<NotificationEventGet> getNotificationEventById(@PathVariable("notification_event_id") String notificationEventId) {
+    public ResponseEntity<NotificationEventGet> getNotificationEventById(
+            @PathVariable("notification_event_id") String notificationEventId) {
         Optional<NotificationEvent> optionalNotificationEvent = this.notificationEventService.getNotificationEventById(notificationEventId);
         if (optionalNotificationEvent.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -52,7 +55,12 @@ public class NotificationEventController {
     }
 
     @PostMapping("/notification-events/{notification_event_id}/replay")
-    public NotificationEventGet getNotificationEventStatus() {
-        return null;
-    } 
+    public ResponseEntity<NotificationEventGet> getNotificationEventStatus(@PathVariable("notification_event_id") String notificationEventId) {
+        Optional<NotificationEvent> optionalNotificationEvent = this.replyNotificationEventService.replayNotificationEvent(notificationEventId);
+        if (optionalNotificationEvent.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        NotificationEvent notificationEvent = optionalNotificationEvent.get();
+        return ResponseEntity.ok(NotificationEventMapper.map(notificationEvent));
+    }
 }

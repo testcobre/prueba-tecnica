@@ -34,7 +34,7 @@
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// This can be used to network with other containers or with the host.
-	,"forwardPorts": [8080]
+	,"forwardPorts": [8080,3000]
 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	//,"postCreateCommand": "export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain monchis --domain-owner 869935069611 --region us-east-1 --query authorizationToken --output text`"

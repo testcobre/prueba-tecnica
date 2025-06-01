@@ -8,9 +8,7 @@ import org.springframework.data.domain.Pageable;
 import com.avivas.domain.entity.NotificationEvent;
 
 public interface NotificationEventService {
-    List<NotificationEvent> getNotificationEvents(String deliveryStatus, OffsetDateTime deliveryDate, Pageable pageable);
+    List<NotificationEvent> getNotificationEvents(String deliveryStatus, OffsetDateTime deliveryDate,Pageable pageable);
 
     Optional<NotificationEvent> getNotificationEventById(String notificationEventId);
-
-    NotificationEvent replayNotificationEvent(String notificationEventId);
 }

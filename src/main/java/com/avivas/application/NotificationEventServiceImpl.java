@@ -6,21 +6,27 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
- 
+
 import com.avivas.domain.entity.NotificationEvent;
 import com.avivas.domain.repository.NotificationEventRepository;
+import com.avivas.domain.ws.WebhookClient;
+
 
 @Service
-public class NotificationEventServiceImpl implements NotificationEventService {
-
+class NotificationEventServiceImpl implements NotificationEventService {
     private final NotificationEventRepository notificationEventRepository;
-
-    NotificationEventServiceImpl(final NotificationEventRepository notificationEventRepository) {
+ 
+    NotificationEventServiceImpl(final NotificationEventRepository notificationEventRepository
+                                 ,final WebhookClient webhookClient
+                                 ,final MetricsService metricsService
+                                 ) {
         this.notificationEventRepository = notificationEventRepository;
     }
 
     @Override
-    public List<NotificationEvent> getNotificationEvents(String deliveryStatus, OffsetDateTime deliveryDate, Pageable pageable) {
+    public List<NotificationEvent> getNotificationEvents(String deliveryStatus
+                                                        ,OffsetDateTime deliveryDate
+                                                        ,Pageable pageable) {
         if (deliveryDate == null) {
             return this.notificationEventRepository.getNotificationEvents(deliveryStatus, pageable);
         }
@@ -30,11 +36,5 @@ public class NotificationEventServiceImpl implements NotificationEventService {
     @Override
     public Optional<NotificationEvent> getNotificationEventById(String notificationEventId) {
         return this.notificationEventRepository.findById(notificationEventId);
-    }
-
-    @Override
-    public NotificationEvent replayNotificationEvent(String notificationEventId) {
-        // Implementation logic to replay a notification event by its ID
-        return null; // Placeholder return statement
-    }
+    }   
 }
